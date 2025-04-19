@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار MBTI للشخصية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f5f5f5;
+            --container-bg: white;
+            --text-color: #333;
+            --question-bg: #f8f9fa;
+            --option-bg: #e9ecef;
+            --option-hover: #dee2e6;
+            --button-bg: #2c3e50;
+            --button-hover: #34495e;
+            --result-bg: #e8f5e9;
+            --tag-bg: #e9ecef;
+            --theme-switch-bg: #ffffff;
+            --theme-switch-color: #333333;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --container-bg: #2d2d2d;
+            --text-color: #ffffff;
+            --question-bg: #3d3d3d;
+            --option-bg: #4d4d4d;
+            --option-hover: #5d5d5d;
+            --button-bg: #4CAF50;
+            --button-hover: #45a049;
+            --result-bg: #2d3436;
+            --tag-bg: #4d4d4d;
+            --theme-switch-bg: #2d2d2d;
+            --theme-switch-color: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--container-bg);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .theme-switch {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--theme-switch-bg);
+            color: var(--theme-switch-color);
+            border: 2px solid currentColor;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .theme-switch:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .theme-switch .fa-sun {
+            display: none;
+        }
+
+        .theme-switch .fa-moon {
+            display: block;
+        }
+
+        [data-theme="dark"] .theme-switch .fa-sun {
+            display: block;
+        }
+
+        [data-theme="dark"] .theme-switch .fa-moon {
+            display: none;
+        }
+
+        h1 {
+            color: var(--text-color);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .question {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: var(--question-bg);
+            border-radius: 8px;
+        }
+
+        .options {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            gap: 10px;
+        }
+
+        .option {
+            flex: 1;
+            padding: 15px;
+            background-color: var(--option-bg);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            color: var(--text-color);
+        }
+
+        .option:hover {
+            background-color: var(--option-hover);
+            transform: translateY(-2px);
+        }
+
+        .option.selected {
+            background-color: var(--button-bg);
+            color: white;
+        }
+
+        .submit-btn {
+            display: block;
+            margin: 30px auto;
+            padding: 15px 30px;
+            background-color: var(--button-bg);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .submit-btn.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .submit-btn:hover {
+            background-color: var(--button-hover);
+        }
+
+        .result {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+            background-color: var(--result-bg);
+            border-radius: 8px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: var(--option-bg);
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: var(--button-bg);
+            border-radius: 5px;
+            transition: width 0.3s;
+        }
+
+        .strengths, .weaknesses, .careers {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: var(--question-bg);
+            border-radius: 5px;
+        }
+
+        .strengths h3, .weaknesses h3, .careers h3 {
+            color: var(--text-color);
+            margin-bottom: 10px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 5px;
+            background-color: var(--tag-bg);
+            border-radius: 15px;
+            font-size: 14px;
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-switch" onclick="toggleTheme()" aria-label="تغيير المظهر">
+        <i class="fas fa-sun"></i>
+        <i class="fas fa-moon"></i>
+    </button>
+    <div class="container">
+        <h1>اختبار MBTI للشخصية</h1>
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+        <div id="quiz-container">
+            <!-- الأسئلة سيتم إضافتها ديناميكياً -->
+        </div>
+        <button class="submit-btn" id="submit-btn" onclick="submitQuiz()">إرسال الإجابات</button>
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // استعادة المظهر المحفوظ
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+            }
+        });
+
+        const questions = [
+            // البعد الأول: الانبساط (E) مقابل الانطواء (I)
+            {
+                question: "في الحفلات، هل تفضل:",
+                options: ["التفاعل مع أكبر عدد من الناس", "التحدث مع عدد قليل من الأصدقاء المقربين"],
+                dimension: "EI"
+            },
+            {
+                question: "عندما تحتاج إلى إعادة شحن طاقتك، هل تفضل:",
+                options: ["قضاء الوقت مع الآخرين", "قضاء الوقت بمفردك"],
+                dimension: "EI"
+            },
+            {
+                question: "في العمل الجماعي، هل تفضل:",
+                options: ["التفاعل المباشر مع الزملاء", "العمل بشكل مستقل"],
+                dimension: "EI"
+            },
+
+            // البعد الثاني: الحس (S) مقابل الحدس (N)
+            {
+                question: "في العمل، هل تركز على:",
+                options: ["الواقع والحقائق الملموسة", "الاحتمالات والأفكار الجديدة"],
+                dimension: "SN"
+            },
+            {
+                question: "عند حل المشكلات، هل تفضل:",
+                options: ["اتباع الأساليب المجربة والمثبتة", "استكشاف طرق جديدة ومبتكرة"],
+                dimension: "SN"
+            },
+            {
+                question: "في التعلم، هل تفضل:",
+                options: ["التفاصيل والحقائق المحددة", "النظريات والمفاهيم العامة"],
+                dimension: "SN"
+            },
+
+            // البعد الثالث: التفكير (T) مقابل المشاعر (F)
+            {
+                question: "عند اتخاذ القرارات، هل تعتمد أكثر على:",
+                options: ["المنطق والتحليل", "المشاعر والقيم الشخصية"],
+                dimension: "TF"
+            },
+            {
+                question: "في النقاشات، هل تركز على:",
+                options: ["الحقائق والمنطق", "العلاقات والمشاعر"],
+                dimension: "TF"
+            },
+            {
+                question: "عند تقييم المواقف، هل تهتم بـ:",
+                options: ["العدالة والإنصاف", "الانسجام والتفاهم"],
+                dimension: "TF"
+            },
+
+            // البعد الرابع: الحكم (J) مقابل الإدراك (P)
+            {
+                question: "هل تفضل:",
+                options: ["التخطيط المسبق للأمور", "المرونة والتلقائية"],
+                dimension: "JP"
+            },
+            {
+                question: "في حياتك اليومية، هل تفضل:",
+                options: ["الالتزام بجدول زمني محدد", "المرونة في تنظيم الوقت"],
+                dimension: "JP"
+            },
+            {
+                question: "عند إنجاز المهام، هل تفضل:",
+                options: ["إنجاز المهام قبل الموعد النهائي", "المرونة في إنجاز المهام"],
+                dimension: "JP"
+            }
+        ];
+
+        let currentQuestion = 0;
+        const answers = new Array(questions.length).fill(null);
+        const submitBtn = document.getElementById('submit-btn');
+
+        function createQuiz() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+            
+            const question = questions[currentQuestion];
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question';
+            questionDiv.innerHTML = `
+                <h3>${currentQuestion + 1}. ${question.question}</h3>
+                <div class="options">
+                    <button class="option" onclick="selectOption(0)">${question.options[0]}</button>
+                    <button class="option" onclick="selectOption(1)">${question.options[1]}</button>
+                </div>
+            `;
+            container.appendChild(questionDiv);
+            
+            // تحديث شريط التقدم
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress').style.width = `${progress}%`;
+
+            // تحديث حالة زر الإرسال
+            updateSubmitButton();
+        }
+
+        function selectOption(optionIndex) {
+            answers[currentQuestion] = questions[currentQuestion].options[optionIndex];
+            
+            // الانتقال إلى السؤال التالي
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                createQuiz();
+            } else {
+                // إذا كانت هذه آخر سؤال، قم بتفعيل زر الإرسال
+                submitBtn.classList.add('active');
+            }
+        }
+
+        function updateSubmitButton() {
+            const allAnswered = answers.every(answer => answer !== null);
+            if (allAnswered) {
+                submitBtn.classList.add('active');
+            } else {
+                submitBtn.classList.remove('active');
+            }
+        }
+
+        function submitQuiz() {
+            // إرسال النتيجة إلى الخادم
+            fetch('/submit_quiz', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({answers: answers})
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data || !data.personality_type) {
+                    throw new Error('Invalid response data');
+                }
+                
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').innerHTML = `
+                    <h2>نوع شخصيتك هو: ${data.personality_type}</h2>
+                    <p>${data.description}</p>
+                    <div class="strengths">
+                        <h3>نقاط القوة:</h3>
+                        ${data.strengths.map(strength => `<span class="tag">${strength}</span>`).join('')}
+                    </div>
+                    <div class="weaknesses">
+                        <h3>نقاط الضعف:</h3>
+                        ${data.weaknesses.map(weakness => `<span class="tag">${weakness}</span>`).join('')}
+                    </div>
+                    <div class="careers">
+                        <h3>المجالات المهنية المناسبة:</h3>
+                        ${data.careers.map(career => `<span class="tag">${career}</span>`).join('')}
+                    </div>
+                `;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').innerHTML = `
+                    <h2>عذراً، حدث خطأ</h2>
+                    <p>حدث خطأ أثناء معالجة النتيجة. يرجى المحاولة مرة أخرى.</p>
+                    <p>تفاصيل الخطأ: ${error.message}</p>
+                `;
+            });
+        }
+
+        // إنشاء الاختبار عند تحميل الصفحة
+        window.onload = createQuiz;
+    </script>
+</body>
+</html> 
