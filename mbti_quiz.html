@@ -235,50 +235,121 @@
             margin-top: 10px;
         }
 
-        .share-btn {
-            flex: 1;
-            padding: 10px;
-            background-color: var(--button-bg);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            text-align: center;
+        .share-btn.facebook {
+            background-color: #3b5998;
         }
 
-        .share-btn:hover {
-            background-color: var(--button-hover);
+        .share-btn.twitter {
+            background-color: #1da1f2;
+        }
+
+        .share-btn.whatsapp {
+            background-color: #25d366;
+        }
+
+        .share-btn.instagram {
+            background-color: #e4405f;
         }
 
         .share-btn i {
             margin-right: 5px;
         }
 
-        .language-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: var(--theme-switch-bg);
-            color: var(--theme-switch-color);
-            border: 2px solid currentColor;
+        .share-btn {
+            flex: 1;
+            padding: 10px;
+            color: white;
+            border: none;
             border-radius: 5px;
-            padding: 5px 10px;
             cursor: pointer;
-            z-index: 1000;
+            transition: background-color 0.3s;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .share-btn:hover {
+            opacity: 0.8;
         }
 
         .developer-support {
             margin-top: 30px;
             text-align: center;
             color: var(--text-color);
+            padding: 15px;
+            background-color: var(--question-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
         .developer-support a {
             color: var(--button-bg);
             text-decoration: none;
             font-weight: bold;
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: var(--button-bg);
+            color: white;
+            border-radius: 30px;
+            transition: all 0.3s ease;
         }
+
+        .developer-support a:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .developer-support i {
+            margin-right: 8px;
+        }
+
+        .disney-princess {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: var(--question-bg);
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .disney-princess h3 {
+            color: var(--text-color);
+            margin-bottom: 10px;
+        }
+
+        .princess-image {
+            width: 150px;
+            height: 150px;
+            margin: 10px 0;
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 70px;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Princess emoji-based styles */
+        .princess-moana::after { content: '🏝️'; }
+        .princess-snow-white::after { content: '🍎'; }
+        .princess-elsa::after { content: '❄️'; }
+        .princess-belle::after { content: '📚'; }
+        .princess-mulan::after { content: '⚔️'; }
+        .princess-rapunzel::after { content: '🎨'; }
+        .princess-anna::after { content: '❤️'; }
+        .princess-merida::after { content: '🏹'; }
+        .princess-jasmine::after { content: '🐯'; }
+        .princess-ariel::after { content: '🧜‍♀️'; }
+        .princess-tiana::after { content: '👩‍🍳'; }
+        .princess-raya::after { content: '🐉'; }
+        .princess-pocahontas::after { content: '🍃'; }
+        .princess-cinderella::after { content: '👠'; }
+        .princess-aurora::after { content: '💤'; }
+        .princess-default::after { content: '👸'; }
     </style>
 </head>
 <body>
@@ -286,7 +357,6 @@
         <i class="fas fa-sun"></i>
         <i class="fas fa-moon"></i>
     </button>
-    <button class="language-toggle" onclick="toggleLanguage()">EN/AR</button>
     <div class="container">
         <h1 data-translate data-en="MBTI Personality Quiz" data-ar="اختبار MBTI للشخصية">اختبار MBTI للشخصية</h1>
         <div class="progress-bar">
@@ -298,7 +368,10 @@
         <button class="submit-btn" id="submit-btn" onclick="submitQuiz()" data-translate data-en="Submit Answers" data-ar="إرسال الإجابات">إرسال الإجابات</button>
         <div id="result" class="result"></div>
         <div class="developer-support">
-            <p>Support the developer: <a href="https://github.com/your-github-username" target="_blank">GitHub</a></p>
+            <p>صُمم هذا الاختبار بواسطة:</p>
+            <a href="https://github.com/Mostafa-Samir-AI/Personality-Quiz" target="_blank">
+                <i class="fab fa-github"></i> Mostafa-Samir-AI
+            </a>
         </div>
     </div>
 
@@ -326,69 +399,105 @@
         const questions = [
             // البعد الأول: الانبساط (E) مقابل الانطواء (I)
             {
-                question: "في الحفلات، هل تفضل:",
-                options: ["التفاعل مع أكبر عدد من الناس", "التحدث مع عدد قليل من الأصدقاء المقربين"],
+                question: { en: "At parties, do you prefer:", ar: "في الحفلات، هل تفضل:" },
+                options: [
+                    { en: "Interacting with as many people as possible", ar: "التفاعل مع أكبر عدد من الناس" },
+                    { en: "Talking to a few close friends", ar: "التحدث مع عدد قليل من الأصدقاء المقربين" }
+                ],
                 dimension: "EI"
             },
             {
-                question: "عندما تحتاج إلى إعادة شحن طاقتك، هل تفضل:",
-                options: ["قضاء الوقت مع الآخرين", "قضاء الوقت بمفردك"],
+                question: { en: "When you need to recharge, do you prefer:", ar: "عندما تحتاج إلى إعادة شحن طاقتك، هل تفضل:" },
+                options: [
+                    { en: "Spending time with others", ar: "قضاء الوقت مع الآخرين" },
+                    { en: "Spending time alone", ar: "قضاء الوقت بمفردك" }
+                ],
                 dimension: "EI"
             },
             {
-                question: "في العمل الجماعي، هل تفضل:",
-                options: ["التفاعل المباشر مع الزملاء", "العمل بشكل مستقل"],
+                question: { en: "In a team, do you prefer:", ar: "في العمل الجماعي، هل تفضل:" },
+                options: [
+                    { en: "Direct interaction with colleagues", ar: "التفاعل المباشر مع الزملاء" },
+                    { en: "Working independently", ar: "العمل بشكل مستقل" }
+                ],
                 dimension: "EI"
             },
 
             // البعد الثاني: الحس (S) مقابل الحدس (N)
             {
-                question: "في العمل، هل تركز على:",
-                options: ["الواقع والحقائق الملموسة", "الاحتمالات والأفكار الجديدة"],
+                question: { en: "In your work, do you focus on:", ar: "في العمل، هل تركز على:" },
+                options: [
+                    { en: "Concrete facts and realities", ar: "الواقع والحقائق الملموسة" },
+                    { en: "Possible outcomes and new ideas", ar: "الاحتمالات والأفكار الجديدة" }
+                ],
                 dimension: "SN"
             },
             {
-                question: "عند حل المشكلات، هل تفضل:",
-                options: ["اتباع الأساليب المجربة والمثبتة", "استكشاف طرق جديدة ومبتكرة"],
+                question: { en: "When solving problems, do you prefer:", ar: "عند حل المشكلات، هل تفضل:" },
+                options: [
+                    { en: "Following proven methods and established practices", ar: "اتباع الأساليب المجربة والمثبتة" },
+                    { en: "Exploring new and innovative approaches", ar: "استكشاف طرق جديدة ومبتكرة" }
+                ],
                 dimension: "SN"
             },
             {
-                question: "في التعلم، هل تفضل:",
-                options: ["التفاصيل والحقائق المحددة", "النظريات والمفاهيم العامة"],
+                question: { en: "In learning, do you prefer:", ar: "في التعلم، هل تفضل:" },
+                options: [
+                    { en: "Specific details and facts", ar: "التفاصيل والحقائق المحددة" },
+                    { en: "Theoretical concepts and general ideas", ar: "النظريات والمفاهيم العامة" }
+                ],
                 dimension: "SN"
             },
 
             // البعد الثالث: التفكير (T) مقابل المشاعر (F)
             {
-                question: "عند اتخاذ القرارات، هل تعتمد أكثر على:",
-                options: ["المنطق والتحليل", "المشاعر والقيم الشخصية"],
+                question: { en: "When making decisions, do you rely more on:", ar: "عند اتخاذ القرارات، هل تعتمد أكثر على:" },
+                options: [
+                    { en: "Logic and analysis", ar: "المنطق والتحليل" },
+                    { en: "Feelings and personal values", ar: "المشاعر والقيم الشخصية" }
+                ],
                 dimension: "TF"
             },
             {
-                question: "في النقاشات، هل تركز على:",
-                options: ["الحقائق والمنطق", "العلاقات والمشاعر"],
+                question: { en: "In discussions, do you focus on:", ar: "في النقاشات، هل تركز على:" },
+                options: [
+                    { en: "Facts and logic", ar: "الحقائق والمنطق" },
+                    { en: "Relationships and feelings", ar: "العلاقات والمشاعر" }
+                ],
                 dimension: "TF"
             },
             {
-                question: "عند تقييم المواقف، هل تهتم بـ:",
-                options: ["العدالة والإنصاف", "الانسجام والتفاهم"],
+                question: { en: "When evaluating situations, do you care about:", ar: "عند تقييم المواقف، هل تهتم بـ:" },
+                options: [
+                    { en: "Fairness and equality", ar: "العدالة والإنصاف" },
+                    { en: "Harmony and understanding", ar: "الانسجام والتفاهم" }
+                ],
                 dimension: "TF"
             },
 
             // البعد الرابع: الحكم (J) مقابل الإدراك (P)
             {
-                question: "هل تفضل:",
-                options: ["التخطيط المسبق للأمور", "المرونة والتلقائية"],
+                question: { en: "Do you prefer:", ar: "هل تفضل:" },
+                options: [
+                    { en: "Planning ahead for things", ar: "التخطيط المسبق للأمور" },
+                    { en: "Flexibility and spontaneity", ar: "المرونة والتلقائية" }
+                ],
                 dimension: "JP"
             },
             {
-                question: "في حياتك اليومية، هل تفضل:",
-                options: ["الالتزام بجدول زمني محدد", "المرونة في تنظيم الوقت"],
+                question: { en: "In your daily life, do you prefer:", ar: "في حياتك اليومية، هل تفضل:" },
+                options: [
+                    { en: "Being committed to a scheduled timetable", ar: "الالتزام بجدول زمني محدد" },
+                    { en: "Flexibility in organizing time", ar: "المرونة في تنظيم الوقت" }
+                ],
                 dimension: "JP"
             },
             {
-                question: "عند إنجاز المهام، هل تفضل:",
-                options: ["إنجاز المهام قبل الموعد النهائي", "المرونة في إنجاز المهام"],
+                question: { en: "When completing tasks, do you prefer:", ar: "عند إنجاز المهام، هل تفضل:" },
+                options: [
+                    { en: "Completing tasks before the final deadline", ar: "إنجاز المهام قبل الموعد النهائي" },
+                    { en: "Flexibility in completing tasks", ar: "المرونة في إنجاز المهام" }
+                ],
                 dimension: "JP"
             }
         ];
@@ -405,10 +514,10 @@
             const questionDiv = document.createElement('div');
             questionDiv.className = 'question';
             questionDiv.innerHTML = `
-                <h3>${currentQuestion + 1}. ${question.question}</h3>
+                <h3 data-translate data-en="${question.question.en}" data-ar="${question.question.ar}">${question.question.ar}</h3>
                 <div class="options">
-                    <button class="option" onclick="selectOption(0)">${question.options[0]}</button>
-                    <button class="option" onclick="selectOption(1)">${question.options[1]}</button>
+                    <button class="option" onclick="selectOption(0)" data-translate data-en="${question.options[0].en}" data-ar="${question.options[0].ar}">${question.options[0].ar}</button>
+                    <button class="option" onclick="selectOption(1)" data-translate data-en="${question.options[1].en}" data-ar="${question.options[1].ar}">${question.options[1].ar}</button>
                 </div>
             `;
             container.appendChild(questionDiv);
@@ -496,9 +605,14 @@
                     <div class="careers">
                         <h3>المجالات المهنية المناسبة:</h3>
                     ${personalityData.careers.map(career => `<span class="tag">${career}</span>`).join('')}
+                </div>
+                <div class="disney-princess">
+                    <h3>شخصية ديزني المشابهة:</h3>
+                    <div class="princess-image ${getPrincessClass(personalityType)}"></div>
+                    <span class="tag">${personalityData.disney_princess}</span>
                     </div>
                     <div class="share-section">
-                        <h3 data-translate data-en="Share your result:" data-ar="شارك نتيجتك:">شارك نتيجتك:</h3>
+                        <h3>شارك نتيجتك:</h3>
                         <div class="share-buttons">
                         <button onclick="shareOnFacebook('${personalityType}')" class="share-btn facebook">
                                 <i class="fab fa-facebook-f"></i> فيسبوك
@@ -509,12 +623,9 @@
                         <button onclick="shareOnWhatsApp('${personalityType}')" class="share-btn whatsapp">
                                 <i class="fab fa-whatsapp"></i> واتساب
                             </button>
-                        <button onclick="copyLink('${personalityType}')" class="share-btn copy-link">
-                                <i class="fas fa-link"></i> نسخ الرابط
-                            </button>
                         <button onclick="shareOnInstagram('${personalityType}')" class="share-btn instagram">
                             <i class="fab fa-instagram"></i> انستغرام
-                        </button>
+                            </button>
                         </div>
                     </div>
                 `;
@@ -538,16 +649,6 @@
             window.open(`https://wa.me/?text=${text}`, '_blank');
         }
 
-        function copyLink(personalityType) {
-            const dummy = document.createElement('input');
-            document.body.appendChild(dummy);
-            dummy.value = window.location.href;
-            dummy.select();
-            document.execCommand('copy');
-            document.body.removeChild(dummy);
-            alert('تم نسخ الرابط!');
-        }
-
         function shareOnInstagram(personalityType) {
             const text = encodeURIComponent(`اكتشفت أن نوع شخصيتي هو ${personalityType} في اختبار MBTI للشخصية!`);
             // Instagram does not have a direct share URL, so this is a placeholder
@@ -561,97 +662,113 @@
                     description: 'الموثوق به - شخص منظم، موثوق، عملي ومنطقي',
                     strengths: ['الدقة', 'الموثوقية', 'التنظيم', 'المنطق', 'الصبر'],
                     weaknesses: ['العناد', 'صعوبة التكيف', 'القسوة المحتملة', 'الحذر المفرط'],
-                    careers: ['المحاسبة', 'الإدارة', 'القانون', 'الطب', 'الهندسة']
+                    careers: ['المحاسبة', 'الإدارة', 'القانون', 'الطب', 'الهندسة'],
+                    disney_princess: 'موانا (Moana) - منظمة وموثوقة وعملية'
                 },
                 'ISFJ': {
                     description: 'الحامي - شخص هادئ، مسؤول، ودود ومخلص',
                     strengths: ['الولاء', 'الاهتمام', 'الموثوقية', 'الصبر', 'الدقة'],
                     weaknesses: ['تجنب الصراع', 'الحساسية المفرطة', 'المقاومة للتغيير'],
-                    careers: ['التمريض', 'التدريس', 'الخدمة الاجتماعية', 'الموارد البشرية', 'الإدارة']
+                    careers: ['التمريض', 'التدريس', 'الخدمة الاجتماعية', 'الموارد البشرية', 'الإدارة'],
+                    disney_princess: 'سنو وايت (Snow White) - مخلصة ولطيفة ومهتمة بالآخرين'
                 },
                 'INFJ': {
                     description: 'المستشار - شخص مثالي، عميق، إبداعي وملهم',
                     strengths: ['الإبداع', 'الحدس', 'المثالية', 'العمق', 'الرؤية'],
                     weaknesses: ['الكمالية', 'الحساسية المفرطة', 'الخصوصية الشديدة'],
-                    careers: ['الاستشارة', 'التدريس', 'الكتابة', 'الفنون', 'الطب النفسي']
+                    careers: ['الاستشارة', 'التدريس', 'الكتابة', 'الفنون', 'الطب النفسي'],
+                    disney_princess: 'إلسا (Elsa) - عميقة وحساسة وتتمتع برؤية خاصة'
                 },
                 'INTJ': {
                     description: 'المخطط الاستراتيجي - شخص مستقل، تحليلي، مبتكر ومصمم',
                     strengths: ['التفكير الاستراتيجي', 'الاستقلالية', 'العقلانية', 'المعرفة', 'الثقة'],
                     weaknesses: ['القسوة المحتملة', 'العزلة', 'الكمالية', 'العناد'],
-                    careers: ['العلوم', 'الهندسة', 'القانون', 'البرمجة', 'الاستشارات']
+                    careers: ['العلوم', 'الهندسة', 'القانون', 'البرمجة', 'الاستشارات'],
+                    disney_princess: 'بيل (Belle) - مستقلة وذكية وتحليلية'
                 },
                 'ISTP': {
                     description: 'الحرفي - شخص عملي، واقعي، منطقي ومرن',
                     strengths: ['المهارة اليدوية', 'المنطق', 'الاستقلالية', 'المرونة', 'الهدوء'],
                     weaknesses: ['صعوبة الالتزام', 'الملل السريع', 'الانعزالية', 'الاندفاع'],
-                    careers: ['الهندسة الميكانيكية', 'الرياضة', 'العمل الشرطي', 'تكنولوجيا المعلومات', 'الطيران']
+                    careers: ['الهندسة الميكانيكية', 'الرياضة', 'العمل الشرطي', 'تكنولوجيا المعلومات', 'الطيران'],
+                    disney_princess: 'مولان (Mulan) - عملية ومنطقية ومستقلة'
                 },
                 'ISFP': {
                     description: 'الفنان - شخص حساس، لطيف، متناغم وعفوي',
                     strengths: ['الإبداع', 'الحساسية', 'اللطف', 'المرونة', 'الولاء'],
                     weaknesses: ['تجنب الصراع', 'صعوبة النقد', 'الانعزالية', 'التردد'],
-                    careers: ['الفنون', 'التصميم', 'العلاج الطبيعي', 'الموسيقى', 'الحرف اليدوية']
+                    careers: ['الفنون', 'التصميم', 'العلاج الطبيعي', 'الموسيقى', 'الحرف اليدوية'],
+                    disney_princess: 'رابونزيل (Rapunzel) - مبدعة وحساسة ومرنة'
                 },
                 'INFP': {
                     description: 'الوسيط - شخص مثالي، فضولي، إبداعي وحساس',
                     strengths: ['الإبداع', 'المثالية', 'التعاطف', 'الأصالة', 'الفضول'],
                     weaknesses: ['الحساسية المفرطة', 'العملية المحدودة', 'الانعزالية', 'التردد'],
-                    careers: ['الكتابة', 'التدريس', 'علم النفس', 'الفنون', 'الخدمة الاجتماعية']
+                    careers: ['الكتابة', 'التدريس', 'علم النفس', 'الفنون', 'الخدمة الاجتماعية'],
+                    disney_princess: 'آنا (Anna) - مثالية وحساسة ومتعاطفة'
                 },
                 'INTP': {
                     description: 'المفكر - شخص منطقي، مبتكر، مستقل وفضولي',
                     strengths: ['التفكير المنطقي', 'الإبداع', 'الاستقلالية', 'الفضول', 'التحليل'],
                     weaknesses: ['الانعزالية', 'التردد', 'التشتت', 'نقص المهارات العاطفية'],
-                    careers: ['العلوم', 'البرمجة', 'الهندسة', 'الفلسفة', 'الرياضيات']
+                    careers: ['العلوم', 'البرمجة', 'الهندسة', 'الفلسفة', 'الرياضيات'],
+                    disney_princess: 'ميريدا (Merida) - مستقلة وفضولية ومنطقية'
                 },
                 'ESTP': {
                     description: 'المروج - شخص نشط، مغامر، ذكي وعملي',
                     strengths: ['الذكاء', 'البديهة', 'الطاقة', 'العملية', 'المرونة'],
                     weaknesses: ['الملل السريع', 'المخاطرة', 'الاندفاع', 'صعوبة الالتزام'],
-                    careers: ['المبيعات', 'التسويق', 'الرياضة', 'الأعمال', 'الترفيه']
+                    careers: ['المبيعات', 'التسويق', 'الرياضة', 'الأعمال', 'الترفيه'],
+                    disney_princess: 'جاسمين (Jasmine) - نشيطة ومغامرة وذكية'
                 },
                 'ESFP': {
                     description: 'المؤدي - شخص اجتماعي، مرح، عفوي ومتحمس',
                     strengths: ['التفاؤل', 'المرح', 'الحماس', 'المهارات الاجتماعية', 'العفوية'],
                     weaknesses: ['تجنب الصراع', 'الصعوبة مع النظريات', 'التشتت', 'الاندفاع'],
-                    careers: ['الترفيه', 'الضيافة', 'العلاقات العامة', 'التدريس', 'الرعاية الصحية']
+                    careers: ['الترفيه', 'الضيافة', 'العلاقات العامة', 'التدريس', 'الرعاية الصحية'],
+                    disney_princess: 'أريل (Ariel) - متحمسة واجتماعية وعفوية'
                 },
                 'ENFP': {
                     description: 'المناصر - شخص حماسي، إبداعي، اجتماعي ومتفائل',
                     strengths: ['الحماس', 'الإبداع', 'التواصل', 'التفاؤل', 'المرونة'],
                     weaknesses: ['التشتت', 'صعوبة المتابعة', 'العاطفية المفرطة', 'التردد'],
-                    careers: ['التدريس', 'الفنون', 'الاستشارات', 'العلاقات العامة', 'التسويق']
+                    careers: ['التدريس', 'الفنون', 'الاستشارات', 'العلاقات العامة', 'التسويق'],
+                    disney_princess: 'تيانا (Tiana) - حماسية وإبداعية ومتفائلة'
                 },
                 'ENTP': {
                     description: 'المبتكر - شخص مبدع، فضولي، مناقش ومبتكر',
                     strengths: ['الإبداع', 'المنطق', 'النقاش', 'المرونة', 'الفضول'],
                     weaknesses: ['المجادلة', 'التشتت', 'صعوبة المتابعة', 'حساسية النقد'],
-                    careers: ['ريادة الأعمال', 'القانون', 'الاستشارات', 'العلوم', 'الهندسة']
+                    careers: ['ريادة الأعمال', 'القانون', 'الاستشارات', 'العلوم', 'الهندسة'],
+                    disney_princess: 'رايا (Raya) - مبدعة وفضولية ومناقشة'
                 },
                 'ESTJ': {
                     description: 'المدير - شخص عملي، موثوق، واقعي ومنظم',
                     strengths: ['التنظيم', 'القيادة', 'الموثوقية', 'الحزم', 'الكفاءة'],
                     weaknesses: ['العناد', 'عدم المرونة', 'الحساسية المحدودة', 'الميل للسيطرة'],
-                    careers: ['الإدارة', 'القانون', 'المحاسبة', 'العسكرية', 'المبيعات']
+                    careers: ['الإدارة', 'القانون', 'المحاسبة', 'العسكرية', 'المبيعات'],
+                    disney_princess: 'پوكاهونتاس (Pocahontas) - قيادية ومنظمة وحازمة'
                 },
                 'ESFJ': {
                     description: 'مقدم الرعاية - شخص اجتماعي، متعاون، مهتم ومسؤول',
                     strengths: ['التعاون', 'الولاء', 'الاهتمام', 'المسؤولية', 'التنظيم'],
                     weaknesses: ['تجنب الصراع', 'الحساسية للنقد', 'الحاجة للاستحسان', 'التقليدية'],
-                    careers: ['التدريس', 'الرعاية الصحية', 'الخدمة الاجتماعية', 'الضيافة', 'المبيعات']
+                    careers: ['التدريس', 'الرعاية الصحية', 'الخدمة الاجتماعية', 'الضيافة', 'المبيعات'],
+                    disney_princess: 'سندريلا (Cinderella) - متعاونة ومهتمة ومسؤولة'
                 },
                 'ENFJ': {
                     description: 'البطل - شخص ملهم، قيادي، متعاطف ومثالي',
                     strengths: ['القيادة', 'التعاطف', 'التواصل', 'المثالية', 'الإلهام'],
                     weaknesses: ['الكمالية', 'التضحية بالنفس', 'الحساسية المفرطة', 'المثالية المفرطة'],
-                    careers: ['التدريس', 'الاستشارات', 'العلاقات العامة', 'العمل الديني', 'الخدمة الاجتماعية']
+                    careers: ['التدريس', 'الاستشارات', 'العلاقات العامة', 'العمل الديني', 'الخدمة الاجتماعية'],
+                    disney_princess: 'الأميرة النائمة (Aurora) - ملهمة ومثالية ومتعاطفة'
                 },
                 'ENTJ': {
                     description: 'القائد - شخص منطقي، حازم، مخطط وقيادي',
                     strengths: ['القيادة', 'المنطق', 'الحزم', 'التخطيط', 'الثقة'],
                     weaknesses: ['القسوة المحتملة', 'الميل للسيطرة', 'العناد', 'نفاد الصبر'],
-                    careers: ['الإدارة التنفيذية', 'القانون', 'ريادة الأعمال', 'السياسة', 'الاستشارات']
+                    careers: ['الإدارة التنفيذية', 'القانون', 'ريادة الأعمال', 'السياسة', 'الاستشارات'],
+                    disney_princess: 'مويانا (Moana) - قيادية وحازمة ومخططة'
                 }
             };
 
@@ -660,26 +777,32 @@
                 description: 'نوع شخصية فريد ومميز',
                 strengths: ['فضولي', 'متأمل', 'مبدع', 'مستقل', 'منطقي'],
                 weaknesses: ['متردد أحيانًا', 'متحفظ', 'صعوبة المتابعة', 'حساس للنقد'],
-                careers: ['مجالات متنوعة تناسب مهاراتك الفريدة']
+                careers: ['مجالات متنوعة تناسب مهاراتك الفريدة'],
+                disney_princess: 'شخصية ديزني فريدة تناسب طبيعتك المميزة'
             };
         }
 
-        function toggleLanguage() {
-            const currentLang = document.documentElement.lang;
-            const elementsToTranslate = document.querySelectorAll('[data-translate]');
-            if (currentLang === 'ar') {
-                document.documentElement.lang = 'en';
-                document.documentElement.dir = 'ltr';
-                elementsToTranslate.forEach(el => {
-                    el.textContent = el.getAttribute('data-en');
-                });
-            } else {
-                document.documentElement.lang = 'ar';
-                document.documentElement.dir = 'rtl';
-                elementsToTranslate.forEach(el => {
-                    el.textContent = el.getAttribute('data-ar');
-                });
-            }
+        // Helper function to get princess class from personality type
+        function getPrincessClass(personalityType) {
+            const princesses = {
+                'ISTJ': 'princess-moana',
+                'ISFJ': 'princess-snow-white',
+                'INFJ': 'princess-elsa',
+                'INTJ': 'princess-belle',
+                'ISTP': 'princess-mulan',
+                'ISFP': 'princess-rapunzel',
+                'INFP': 'princess-anna',
+                'INTP': 'princess-merida',
+                'ESTP': 'princess-jasmine',
+                'ESFP': 'princess-ariel',
+                'ENFP': 'princess-tiana',
+                'ENTP': 'princess-raya',
+                'ESTJ': 'princess-pocahontas',
+                'ESFJ': 'princess-cinderella',
+                'ENFJ': 'princess-aurora',
+                'ENTJ': 'princess-moana'
+            };
+            return princesses[personalityType] || 'princess-default';
         }
 
         // إنشاء الاختبار عند تحميل الصفحة
