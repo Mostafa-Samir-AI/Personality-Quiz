@@ -49,9 +49,24 @@
             max-width: 800px;
             margin: 0 auto;
             background-color: var(--container-bg);
-            padding: 30px;
+            padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            .option {
+                padding: 10px;
+            }
+            .submit-btn {
+                padding: 10px 20px;
+            }
         }
 
         .theme-switch {
@@ -206,6 +221,64 @@
             font-size: 14px;
             color: var(--text-color);
         }
+
+        .share-section {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: var(--question-bg);
+            border-radius: 5px;
+        }
+
+        .share-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .share-btn {
+            flex: 1;
+            padding: 10px;
+            background-color: var(--button-bg);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: center;
+        }
+
+        .share-btn:hover {
+            background-color: var(--button-hover);
+        }
+
+        .share-btn i {
+            margin-right: 5px;
+        }
+
+        .language-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--theme-switch-bg);
+            color: var(--theme-switch-color);
+            border: 2px solid currentColor;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .developer-support {
+            margin-top: 30px;
+            text-align: center;
+            color: var(--text-color);
+        }
+
+        .developer-support a {
+            color: var(--button-bg);
+            text-decoration: none;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -213,16 +286,20 @@
         <i class="fas fa-sun"></i>
         <i class="fas fa-moon"></i>
     </button>
+    <button class="language-toggle" onclick="toggleLanguage()">EN/AR</button>
     <div class="container">
-        <h1>اختبار MBTI للشخصية</h1>
+        <h1 data-translate data-en="MBTI Personality Quiz" data-ar="اختبار MBTI للشخصية">اختبار MBTI للشخصية</h1>
         <div class="progress-bar">
             <div class="progress" id="progress"></div>
         </div>
         <div id="quiz-container">
             <!-- الأسئلة سيتم إضافتها ديناميكياً -->
         </div>
-        <button class="submit-btn" id="submit-btn" onclick="submitQuiz()">إرسال الإجابات</button>
+        <button class="submit-btn" id="submit-btn" onclick="submitQuiz()" data-translate data-en="Submit Answers" data-ar="إرسال الإجابات">إرسال الإجابات</button>
         <div id="result" class="result"></div>
+        <div class="developer-support">
+            <p>Support the developer: <a href="https://github.com/your-github-username" target="_blank">GitHub</a></p>
+        </div>
     </div>
 
     <script>
@@ -367,52 +444,242 @@
         }
 
         function submitQuiz() {
-            // إرسال النتيجة إلى الخادم
-            fetch('/submit_quiz', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({answers: answers})
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (!data || !data.personality_type) {
-                    throw new Error('Invalid response data');
-                }
+            // Calculate personality type based on answers
+            const scores = {
+                'E': 0, 'I': 0,
+                'S': 0, 'N': 0,
+                'T': 0, 'F': 0,
+                'J': 0, 'P': 0
+            };
+
+            // Process answers
+            answers.forEach((answer, index) => {
+                const question = questions[index];
+                const optionIndex = question.options.indexOf(answer);
+                const dimension = question.dimension;
                 
+                if (dimension === 'EI') {
+                    optionIndex === 0 ? scores['E']++ : scores['I']++;
+                } else if (dimension === 'SN') {
+                    optionIndex === 0 ? scores['S']++ : scores['N']++;
+                } else if (dimension === 'TF') {
+                    optionIndex === 0 ? scores['T']++ : scores['F']++;
+                } else if (dimension === 'JP') {
+                    optionIndex === 0 ? scores['J']++ : scores['P']++;
+                }
+            });
+
+            // Determine personality type
+            const personalityType = [
+                scores['E'] >= scores['I'] ? 'E' : 'I',
+                scores['S'] >= scores['N'] ? 'S' : 'N',
+                scores['T'] >= scores['F'] ? 'T' : 'F',
+                scores['J'] >= scores['P'] ? 'J' : 'P'
+            ].join('');
+
+            // Get personality data
+            const personalityData = getPersonalityData(personalityType);
+
+            // Display result
                 document.getElementById('result').style.display = 'block';
                 document.getElementById('result').innerHTML = `
-                    <h2>نوع شخصيتك هو: ${data.personality_type}</h2>
-                    <p>${data.description}</p>
+                <h2>نوع شخصيتك هو: ${personalityType}</h2>
+                <p>${personalityData.description}</p>
                     <div class="strengths">
                         <h3>نقاط القوة:</h3>
-                        ${data.strengths.map(strength => `<span class="tag">${strength}</span>`).join('')}
+                    ${personalityData.strengths.map(strength => `<span class="tag">${strength}</span>`).join('')}
                     </div>
                     <div class="weaknesses">
                         <h3>نقاط الضعف:</h3>
-                        ${data.weaknesses.map(weakness => `<span class="tag">${weakness}</span>`).join('')}
+                    ${personalityData.weaknesses.map(weakness => `<span class="tag">${weakness}</span>`).join('')}
                     </div>
                     <div class="careers">
                         <h3>المجالات المهنية المناسبة:</h3>
-                        ${data.careers.map(career => `<span class="tag">${career}</span>`).join('')}
+                    ${personalityData.careers.map(career => `<span class="tag">${career}</span>`).join('')}
+                    </div>
+                    <div class="share-section">
+                        <h3 data-translate data-en="Share your result:" data-ar="شارك نتيجتك:">شارك نتيجتك:</h3>
+                        <div class="share-buttons">
+                        <button onclick="shareOnFacebook('${personalityType}')" class="share-btn facebook">
+                                <i class="fab fa-facebook-f"></i> فيسبوك
+                            </button>
+                        <button onclick="shareOnTwitter('${personalityType}')" class="share-btn twitter">
+                                <i class="fab fa-twitter"></i> تويتر
+                            </button>
+                        <button onclick="shareOnWhatsApp('${personalityType}')" class="share-btn whatsapp">
+                                <i class="fab fa-whatsapp"></i> واتساب
+                            </button>
+                        <button onclick="copyLink('${personalityType}')" class="share-btn copy-link">
+                                <i class="fas fa-link"></i> نسخ الرابط
+                            </button>
+                        <button onclick="shareOnInstagram('${personalityType}')" class="share-btn instagram">
+                            <i class="fab fa-instagram"></i> انستغرام
+                        </button>
+                        </div>
                     </div>
                 `;
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('result').style.display = 'block';
-                document.getElementById('result').innerHTML = `
-                    <h2>عذراً، حدث خطأ</h2>
-                    <p>حدث خطأ أثناء معالجة النتيجة. يرجى المحاولة مرة أخرى.</p>
-                    <p>تفاصيل الخطأ: ${error.message}</p>
-                `;
-            });
+        }
+
+        // Social sharing functions
+        function shareOnFacebook(personalityType) {
+            const url = encodeURIComponent(window.location.href);
+            const text = encodeURIComponent(`اكتشفت أن نوع شخصيتي هو ${personalityType} في اختبار MBTI للشخصية!`);
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, '_blank');
+        }
+
+        function shareOnTwitter(personalityType) {
+            const url = encodeURIComponent(window.location.href);
+            const text = encodeURIComponent(`اكتشفت أن نوع شخصيتي هو ${personalityType} في اختبار MBTI للشخصية!`);
+            window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank');
+        }
+
+        function shareOnWhatsApp(personalityType) {
+            const text = encodeURIComponent(`اكتشفت أن نوع شخصيتي هو ${personalityType} في اختبار MBTI للشخصية! ${window.location.href}`);
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
+
+        function copyLink(personalityType) {
+            const dummy = document.createElement('input');
+            document.body.appendChild(dummy);
+            dummy.value = window.location.href;
+            dummy.select();
+            document.execCommand('copy');
+            document.body.removeChild(dummy);
+            alert('تم نسخ الرابط!');
+        }
+
+        function shareOnInstagram(personalityType) {
+            const text = encodeURIComponent(`اكتشفت أن نوع شخصيتي هو ${personalityType} في اختبار MBTI للشخصية!`);
+            // Instagram does not have a direct share URL, so this is a placeholder
+            alert('Share on Instagram: ' + text);
+        }
+
+        // Personality types data
+        function getPersonalityData(type) {
+            const personalityTypes = {
+                'ISTJ': {
+                    description: 'الموثوق به - شخص منظم، موثوق، عملي ومنطقي',
+                    strengths: ['الدقة', 'الموثوقية', 'التنظيم', 'المنطق', 'الصبر'],
+                    weaknesses: ['العناد', 'صعوبة التكيف', 'القسوة المحتملة', 'الحذر المفرط'],
+                    careers: ['المحاسبة', 'الإدارة', 'القانون', 'الطب', 'الهندسة']
+                },
+                'ISFJ': {
+                    description: 'الحامي - شخص هادئ، مسؤول، ودود ومخلص',
+                    strengths: ['الولاء', 'الاهتمام', 'الموثوقية', 'الصبر', 'الدقة'],
+                    weaknesses: ['تجنب الصراع', 'الحساسية المفرطة', 'المقاومة للتغيير'],
+                    careers: ['التمريض', 'التدريس', 'الخدمة الاجتماعية', 'الموارد البشرية', 'الإدارة']
+                },
+                'INFJ': {
+                    description: 'المستشار - شخص مثالي، عميق، إبداعي وملهم',
+                    strengths: ['الإبداع', 'الحدس', 'المثالية', 'العمق', 'الرؤية'],
+                    weaknesses: ['الكمالية', 'الحساسية المفرطة', 'الخصوصية الشديدة'],
+                    careers: ['الاستشارة', 'التدريس', 'الكتابة', 'الفنون', 'الطب النفسي']
+                },
+                'INTJ': {
+                    description: 'المخطط الاستراتيجي - شخص مستقل، تحليلي، مبتكر ومصمم',
+                    strengths: ['التفكير الاستراتيجي', 'الاستقلالية', 'العقلانية', 'المعرفة', 'الثقة'],
+                    weaknesses: ['القسوة المحتملة', 'العزلة', 'الكمالية', 'العناد'],
+                    careers: ['العلوم', 'الهندسة', 'القانون', 'البرمجة', 'الاستشارات']
+                },
+                'ISTP': {
+                    description: 'الحرفي - شخص عملي، واقعي، منطقي ومرن',
+                    strengths: ['المهارة اليدوية', 'المنطق', 'الاستقلالية', 'المرونة', 'الهدوء'],
+                    weaknesses: ['صعوبة الالتزام', 'الملل السريع', 'الانعزالية', 'الاندفاع'],
+                    careers: ['الهندسة الميكانيكية', 'الرياضة', 'العمل الشرطي', 'تكنولوجيا المعلومات', 'الطيران']
+                },
+                'ISFP': {
+                    description: 'الفنان - شخص حساس، لطيف، متناغم وعفوي',
+                    strengths: ['الإبداع', 'الحساسية', 'اللطف', 'المرونة', 'الولاء'],
+                    weaknesses: ['تجنب الصراع', 'صعوبة النقد', 'الانعزالية', 'التردد'],
+                    careers: ['الفنون', 'التصميم', 'العلاج الطبيعي', 'الموسيقى', 'الحرف اليدوية']
+                },
+                'INFP': {
+                    description: 'الوسيط - شخص مثالي، فضولي، إبداعي وحساس',
+                    strengths: ['الإبداع', 'المثالية', 'التعاطف', 'الأصالة', 'الفضول'],
+                    weaknesses: ['الحساسية المفرطة', 'العملية المحدودة', 'الانعزالية', 'التردد'],
+                    careers: ['الكتابة', 'التدريس', 'علم النفس', 'الفنون', 'الخدمة الاجتماعية']
+                },
+                'INTP': {
+                    description: 'المفكر - شخص منطقي، مبتكر، مستقل وفضولي',
+                    strengths: ['التفكير المنطقي', 'الإبداع', 'الاستقلالية', 'الفضول', 'التحليل'],
+                    weaknesses: ['الانعزالية', 'التردد', 'التشتت', 'نقص المهارات العاطفية'],
+                    careers: ['العلوم', 'البرمجة', 'الهندسة', 'الفلسفة', 'الرياضيات']
+                },
+                'ESTP': {
+                    description: 'المروج - شخص نشط، مغامر، ذكي وعملي',
+                    strengths: ['الذكاء', 'البديهة', 'الطاقة', 'العملية', 'المرونة'],
+                    weaknesses: ['الملل السريع', 'المخاطرة', 'الاندفاع', 'صعوبة الالتزام'],
+                    careers: ['المبيعات', 'التسويق', 'الرياضة', 'الأعمال', 'الترفيه']
+                },
+                'ESFP': {
+                    description: 'المؤدي - شخص اجتماعي، مرح، عفوي ومتحمس',
+                    strengths: ['التفاؤل', 'المرح', 'الحماس', 'المهارات الاجتماعية', 'العفوية'],
+                    weaknesses: ['تجنب الصراع', 'الصعوبة مع النظريات', 'التشتت', 'الاندفاع'],
+                    careers: ['الترفيه', 'الضيافة', 'العلاقات العامة', 'التدريس', 'الرعاية الصحية']
+                },
+                'ENFP': {
+                    description: 'المناصر - شخص حماسي، إبداعي، اجتماعي ومتفائل',
+                    strengths: ['الحماس', 'الإبداع', 'التواصل', 'التفاؤل', 'المرونة'],
+                    weaknesses: ['التشتت', 'صعوبة المتابعة', 'العاطفية المفرطة', 'التردد'],
+                    careers: ['التدريس', 'الفنون', 'الاستشارات', 'العلاقات العامة', 'التسويق']
+                },
+                'ENTP': {
+                    description: 'المبتكر - شخص مبدع، فضولي، مناقش ومبتكر',
+                    strengths: ['الإبداع', 'المنطق', 'النقاش', 'المرونة', 'الفضول'],
+                    weaknesses: ['المجادلة', 'التشتت', 'صعوبة المتابعة', 'حساسية النقد'],
+                    careers: ['ريادة الأعمال', 'القانون', 'الاستشارات', 'العلوم', 'الهندسة']
+                },
+                'ESTJ': {
+                    description: 'المدير - شخص عملي، موثوق، واقعي ومنظم',
+                    strengths: ['التنظيم', 'القيادة', 'الموثوقية', 'الحزم', 'الكفاءة'],
+                    weaknesses: ['العناد', 'عدم المرونة', 'الحساسية المحدودة', 'الميل للسيطرة'],
+                    careers: ['الإدارة', 'القانون', 'المحاسبة', 'العسكرية', 'المبيعات']
+                },
+                'ESFJ': {
+                    description: 'مقدم الرعاية - شخص اجتماعي، متعاون، مهتم ومسؤول',
+                    strengths: ['التعاون', 'الولاء', 'الاهتمام', 'المسؤولية', 'التنظيم'],
+                    weaknesses: ['تجنب الصراع', 'الحساسية للنقد', 'الحاجة للاستحسان', 'التقليدية'],
+                    careers: ['التدريس', 'الرعاية الصحية', 'الخدمة الاجتماعية', 'الضيافة', 'المبيعات']
+                },
+                'ENFJ': {
+                    description: 'البطل - شخص ملهم، قيادي، متعاطف ومثالي',
+                    strengths: ['القيادة', 'التعاطف', 'التواصل', 'المثالية', 'الإلهام'],
+                    weaknesses: ['الكمالية', 'التضحية بالنفس', 'الحساسية المفرطة', 'المثالية المفرطة'],
+                    careers: ['التدريس', 'الاستشارات', 'العلاقات العامة', 'العمل الديني', 'الخدمة الاجتماعية']
+                },
+                'ENTJ': {
+                    description: 'القائد - شخص منطقي، حازم، مخطط وقيادي',
+                    strengths: ['القيادة', 'المنطق', 'الحزم', 'التخطيط', 'الثقة'],
+                    weaknesses: ['القسوة المحتملة', 'الميل للسيطرة', 'العناد', 'نفاد الصبر'],
+                    careers: ['الإدارة التنفيذية', 'القانون', 'ريادة الأعمال', 'السياسة', 'الاستشارات']
+                }
+            };
+
+            // Return default if type not found
+            return personalityTypes[type] || {
+                description: 'نوع شخصية فريد ومميز',
+                strengths: ['فضولي', 'متأمل', 'مبدع', 'مستقل', 'منطقي'],
+                weaknesses: ['متردد أحيانًا', 'متحفظ', 'صعوبة المتابعة', 'حساس للنقد'],
+                careers: ['مجالات متنوعة تناسب مهاراتك الفريدة']
+            };
+        }
+
+        function toggleLanguage() {
+            const currentLang = document.documentElement.lang;
+            const elementsToTranslate = document.querySelectorAll('[data-translate]');
+            if (currentLang === 'ar') {
+                document.documentElement.lang = 'en';
+                document.documentElement.dir = 'ltr';
+                elementsToTranslate.forEach(el => {
+                    el.textContent = el.getAttribute('data-en');
+                });
+            } else {
+                document.documentElement.lang = 'ar';
+                document.documentElement.dir = 'rtl';
+                elementsToTranslate.forEach(el => {
+                    el.textContent = el.getAttribute('data-ar');
+                });
+            }
         }
 
         // إنشاء الاختبار عند تحميل الصفحة
