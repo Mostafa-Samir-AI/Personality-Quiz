@@ -175,7 +175,8 @@ function createQuiz() {
     questionDiv.classList.add("visible");
   }, 100);
 
-  const progress = (currentQuestion / questions.length) * 100;
+  // Updated progress calculation to fit 12 questions exactly
+  const progress = (currentQuestion / (questions.length - 1)) * 100;
   document.getElementById("progress").style.width = `${progress}%`;
 }
 
